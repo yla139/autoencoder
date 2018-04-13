@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from functools import partial
 
+mnist = input_data.read_data_sets(train_dir="/data")
 
 n_inputs = 28 * 28
 n_hidden1 = 100
