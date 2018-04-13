@@ -2,6 +2,17 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from functools import partial
 
+import numpy as np
+import os
+import sys
+
+# use Matplotlib
+import matplotlib.pyplot as plt
+
+plt.rcParams['axes.labelsize'] = 14
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
+
 mnist = input_data.read_data_sets(train_dir="/data")
 
 n_inputs = 28 * 28
@@ -52,3 +63,34 @@ with tf.Session() as sess:
         loss_train = reconstruction_loss.eval(feed_dict={X: X_batch}) 
         print("\r{}".format(epoch), "Train MSE:", loss_train) 
         saver.save(sess, "./my_model_all_layers.ckpt") 
+
+
+PROJECT_ROOT_DIR = "."
+CHAPTER_ID = "autoencoders"
+
+def plot_image(image, shape=[28, 28]):
+    plt.imshow(image.reshape(shape), cmap="Greys", interpolation="nearest")
+    plt.axis("off")
+
+def save_fig(fig_id, tight_layout=True):
+    path = os.path.join(".", "images", CHAPTER_ID, fig_id + ".png")
+    print("Saving figure", fig_id)
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(path, format='png', dpi=300)
+
+def show_reconstructed_digits(X, outputs, model_path = None, n_test_digits = 2):
+    with tf.Session() as sess:
+        if model_path:
+            saver.restore(sess, model_path)
+        X_test = mnist.test.images[:n_test_digits]
+        outputs_val = outputs.eval(feed_dict={X: X_test})
+    fig = plt.figure(figsize=(8, 3 * n_test_digits))
+    for digit_index in range(n_test_digits):
+        plt.subplot(n_test_digits, 2, digit_index * 2 + 1)
+        plot_image(X_test[digit_index])
+        plt.subplot(n_test_digits, 2, digit_index * 2 + 2)
+        plot_image(outputs_val[digit_index])
+
+show_reconstructed_digits(X, outputs, "./my_model_all_layers.ckpt")
+save_fig("reconstruction_plot")
