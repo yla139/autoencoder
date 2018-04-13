@@ -37,15 +37,15 @@ saver = tf.train.Saver()
 
 
 # train it !
-n_ephochs = 5
-n_iterations = 150
+n_epochs = 5
+batch_size = 150
 
 with tf.Session() as sess:
     init.run()
     for epoch in range(n_epochs):
-        n_batches = mnist.train.num_examples // batch_size
+        n_batches = mnist.train.num_examples  # batch_size
         for iteration in range(n_batches):
-            print("\r{}%".format(100 * iteration // n_batches), end="") # not shown in sys.stdout.flush() # not shown
+            print("\r{}%".format(100 * iteration // n_batches), end="")  # not shown in sys.stdout.flush() # not shown
             X_batch, y_batch = mnist.train.next_batch(batch_size)
             sess.run(training_op, feed_dict={X: X_batch})
         loss_train = reconstruction_loss.eval(feed_dict={X: X_batch}) 
