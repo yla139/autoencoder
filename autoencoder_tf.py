@@ -35,7 +35,7 @@ outputs = tf.layers.dense(hidden3, n_outputs, name="outputs")
 # Loss is measured by subtracting input from the output
 reconstruction_loss = tf.reduce_mean(tf.square(outputs - X))   # MSE
 optimizer = tf.train.AdamOptimizer(learning_rate)
-training_op = optimizer.minimize(learning_rate)
+training_op = optimizer.minimize(reconstruction_loss)
 
 init = tf.global_variables_initializer()
 saver = tf.train.Saver() 
@@ -86,6 +86,3 @@ def show_reconstructed_digits(X, outputs, model_path = None, n_test_digits = 2):
         plot_image(X_test[digit_index])
         plt.subplot(n_test_digits, 2, digit_index * 2 + 2)
         plot_image(outputs_val[digit_index])
-
-show_reconstructed_digits(X, outputs, "./my_model_all_layers.ckpt")
-save_fig("reconstruction_plot")
