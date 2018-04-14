@@ -22,27 +22,20 @@ n_hidden3 = n_hidden1
 n_outputs = n_inputs
 
 learning_rate = 0.01
-l2_reg = 0.0001
+noise_level = 1.0
 
 X = tf.placeholder(tf.float32, shape=[None, n_inputs])
+X_noisy = X + noise_level * tf.random_normal(tf.shape(X))
 
-he_init = tf.contrib.layers.variance_scaling_initializer() # He initialization
-l2_regularizer = tf.contrib.layers.l2_regularizer(l2_reg)
-my_dense_layer = partial(tf.layers.dense, activation=tf.nn.elu, kernel_initializer=he_init, kernel_regularizer=l2_regularizer)
-
-hidden1 = my_dense_layer(X, n_hidden1)
-hidden2 = my_dense_layer(hidden1, n_hidden2)
-hidden3 = my_dense_layer(hidden2, n_hidden3)
-outputs = my_dense_layer(hidden3, n_outputs, activation=None)
+hidden1 = tf.layers.dense(X_noisy, n_hidden1, activation=tf.nn.relu, name="hidden1")
+hidden2 = tf.layers.dense(hidden1, n_hidden2, activation=tf.nn.relu, name="hidden2")
+hidden3 = tf.layers.dense(hidden2, n_hidden3, activation=tf.nn.relu, name="hidden3")
+outputs = tf.layers.dense(hidden3, n_outputs, name="outputs")
 
 # Loss is measured by subtracting input from the output
-reconstruction_loss = tf.reduce_mean(tf.square(outputs - X))
-
-reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-loss = tf.add_n([reconstruction_loss] + reg_losses)
-
+reconstruction_loss = tf.reduce_mean(tf.square(outputs - X))   # MSE
 optimizer = tf.train.AdamOptimizer(learning_rate)
-training_op = optimizer.minimize(loss)
+training_op = optimizer.minimize(learning_rate)
 
 init = tf.global_variables_initializer()
 saver = tf.train.Saver() 
@@ -62,7 +55,9 @@ with tf.Session() as sess:
             sess.run(training_op, feed_dict={X: X_batch})
         loss_train = reconstruction_loss.eval(feed_dict={X: X_batch}) 
         print("\r{}".format(epoch), "Train MSE:", loss_train) 
-        saver.save(sess, "./my_model_all_layers.ckpt") 
+        saver.save(sess, "./HW10P1.ckpt") 
+
+show_reconstructed_digits(X, outputs, "./HW10P1.ckpt")
 
 
 PROJECT_ROOT_DIR = "."
