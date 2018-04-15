@@ -86,3 +86,5 @@ with tf.Session() as sess:
 
 show_reconstructed_digits(X, outputs, "./HW10P1.ckpt")
 
+plt.show()
+
